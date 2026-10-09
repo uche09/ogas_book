@@ -1,4 +1,4 @@
-use ob_api::{config, db, routes::create_router};
+use ob_api::{config, db, routes::create_router, state::AppState};
 use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -18,7 +18,8 @@ async fn main() -> Result<(), anyhow::Error> {
         .expect("Failed to connect to Postgres");
 
     let config = config::Config::from_env()?;
-
+    let state = AppState::new(pg_pool);
+    
     // Build router
     let router = create_router();
     let addr = format!("0.0.0.0:{}", config.port);
