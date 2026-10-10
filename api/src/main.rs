@@ -19,7 +19,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let config = config::Config::from_env()?;
     let state = AppState::new(pg_pool);
-    
+
     // Build router
     let router = create_router();
     let addr = format!("0.0.0.0:{}", config.port);
