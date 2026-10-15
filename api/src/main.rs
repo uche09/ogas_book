@@ -21,7 +21,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let state = AppState::new(pg_pool);
 
     // Build router
-    let router = create_router();
+    let router = create_router(state);
     let addr = format!("0.0.0.0:{}", config.port);
 
     // Bind to host port and serve
