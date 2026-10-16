@@ -1,15 +1,25 @@
 use ob_api::{config, db, routes::create_router, state::AppState};
 use std::env;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::{EnvFilter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     // Logging
     tracing_subscriber::registry()
         .with(
-            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or("my_api=debug".into()),
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| EnvFilter::new("info")),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(
+            tracing_subscriber::fmt::layer()
+            .with_writer(std::io::stdout)
+            .with_target(true)
+            .with_thread_ids(true)
+            .with_file(true)
+            .with_line_number(true)
+            .with_span_events(FmtSpan::CLOSE)
+            .pretty()
+        )
         .init();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
