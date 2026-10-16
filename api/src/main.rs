@@ -22,12 +22,16 @@ async fn main() -> Result<(), anyhow::Error> {
         )
         .init();
 
+    // Config::from_env() initializes dotenv() internally to enable reading from .env file
+    // So calling function first before any subsiquent read from .env environment variables data,
+    // like DATABASE_URL below.
+    let config = config::Config::from_env()?;
+
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pg_pool = db::make_pool(&database_url)
         .await
         .expect("Failed to connect to Postgres");
 
-    let config = config::Config::from_env()?;
     let state = AppState::new(pg_pool);
 
     // Build router
