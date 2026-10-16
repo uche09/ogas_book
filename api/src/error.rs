@@ -1,7 +1,7 @@
 use axum::{Json, http::StatusCode, response::IntoResponse};
 use serde_json::json;
 use thiserror::Error;
-use validator::ValidationError;
+use validator::ValidationErrors;
 
 #[derive(Debug, Error)]
 pub enum ApiError {
@@ -18,7 +18,7 @@ pub enum ApiError {
     DatabaseError(#[from] sqlx::Error),
 
     #[error("Validation error")]
-    Validation(#[from] ValidationError),
+    Validation(#[from] ValidationErrors),
 }
 
 impl IntoResponse for ApiError {

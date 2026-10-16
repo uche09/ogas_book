@@ -6,7 +6,7 @@ use argon2::{
     password_hash::{phc::PasswordHash, PasswordHasher, PasswordVerifier},
     Argon2,
 };
-use validator::{Validate, ValidationError};
+use validator::{Validate, ValidationError, ValidationErrors};
 
 use super::*;
 
@@ -47,11 +47,15 @@ pub struct NewUser {
 }
 
 pub async fn create_new_user(mut payload: UserCredentials, state: AppState) -> Result<NewUser, ApiError> {
+    payload.validate()?;
+
     if users::email_already_exist(&payload.email, &state.pg_pool).await? {
         let mut err = ValidationError::new("Duplicate email detected");
         err.message = Some("An account already exist with this email".into());
 
-        return Err(ApiError::Validation(err))
+        let mut val_err = ValidationErrors::new();
+        val_err.add("Duplicate email detected", err);
+        return Err(ApiError::Validation(val_err))
     }
  
     // The argon2 crate uses a memory heavy password hashing algorithm, making the hashed password difficult
