@@ -5,17 +5,23 @@ use validator::ValidationErrors;
 
 #[derive(Debug, Error)]
 pub enum ApiError {
-    #[error("Not Found")]
-    NotFound,
-
     #[error("Bad request: {0}")]
     BadRequest(String),
 
     #[error("Internal error")]
-    InternalError(#[from] anyhow::Error),
+    DatabaseError(#[from] sqlx::Error),
+
+    #[error("Forbidden")]
+    Forbidden(String),
 
     #[error("Internal error")]
-    DatabaseError(#[from] sqlx::Error),
+    InternalError(#[from] anyhow::Error),
+
+    #[error("Not Found")]
+    NotFound,
+
+    #[error("Unauthorized")]
+    Unauthorized(String),
 
     #[error("Validation error")]
     Validation(#[from] ValidationErrors),
@@ -39,6 +45,14 @@ impl IntoResponse for ApiError {
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Internal server error".to_string(),
                 )
+            }
+            ApiError::Forbidden(resource) => {
+                tracing::warn!("Forbidden access attempt on: {resource}");
+                (StatusCode::FORBIDDEN, "Not allowed".to_string())
+            }
+            ApiError::Unauthorized(log) => {
+                tracing::warn!("Unauthorized: {log}");
+                (StatusCode::UNAUTHORIZED, "Unauthorized".to_string())
             }
             ApiError::Validation(e) => (StatusCode::UNPROCESSABLE_ENTITY, e.to_string()),
         };
