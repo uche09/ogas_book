@@ -1,6 +1,12 @@
+pub mod sessions;
 pub mod users;
 
-pub use sqlx::postgres::{PgPool, PgPoolOptions};
+pub use crate::error::ApiError;
+pub use sqlx::{
+    postgres::{PgPool, PgPoolOptions, PgQueryResult},
+    query, query_as,
+};
+pub use uuid::Uuid;
 
 pub async fn make_pool(database_url: &str) -> Result<PgPool, sqlx::Error> {
     PgPoolOptions::new()
