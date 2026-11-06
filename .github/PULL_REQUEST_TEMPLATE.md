@@ -1,6 +1,3 @@
-## Task ID
-<!-- e.g. W1.A5, W2.B3 — from the implementation plan -->
-
 ## What changed
 <!-- Short description. Link the task's Definition of Done and confirm it's met. -->
 
