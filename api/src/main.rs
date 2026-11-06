@@ -1,6 +1,7 @@
 use ob_api::{config, db, routes::create_router, state::AppState};
-use std::env;
-use tracing_subscriber::{EnvFilter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::{
+    EnvFilter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -12,27 +13,23 @@ async fn main() -> Result<(), anyhow::Error> {
         )
         .with(
             tracing_subscriber::fmt::layer()
-            .with_writer(std::io::stdout)
-            .with_target(true)
-            .with_thread_ids(true)
-            .with_file(true)
-            .with_line_number(true)
-            .with_span_events(FmtSpan::CLOSE)
-            .pretty()
+                .with_writer(std::io::stdout)
+                .with_target(true)
+                .with_thread_ids(true)
+                .with_file(true)
+                .with_line_number(true)
+                .with_span_events(FmtSpan::CLOSE)
+                .pretty(),
         )
         .init();
 
-    // Config::from_env() initializes dotenv() internally to enable reading from .env file
-    // So calling function first before any subsiquent read from .env environment variables data,
-    // like DATABASE_URL below.
     let config = config::Config::from_env()?;
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pg_pool = db::make_pool(&database_url)
+    let pg_pool = db::make_pool(&config.db_url)
         .await
         .expect("Failed to connect to Postgres");
 
-    let state = AppState::new(pg_pool);
+    let state = AppState::new(pg_pool, config.to_owned()).await?;
 
     // Build router
     let router = create_router(state);
