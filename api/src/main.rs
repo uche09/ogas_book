@@ -1,4 +1,5 @@
 use ob_api::{config, db, routes::create_router, state::AppState};
+use sqlx::migrate;
 use tracing_subscriber::{
     EnvFilter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt,
 };
@@ -30,6 +31,8 @@ async fn main() -> Result<(), anyhow::Error> {
         .expect("Failed to connect to Postgres");
 
     let state = AppState::new(pg_pool, config.to_owned()).await?;
+
+    migrate!().run(&state.pg_pool).await?;
 
     // Build router
     let router = create_router(state);
