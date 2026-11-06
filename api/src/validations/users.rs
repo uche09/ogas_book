@@ -36,3 +36,25 @@ pub fn is_strong_password(password: &str) -> Result<(), ValidationError> {
 
     Err(error)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::is_strong_password;
+
+    #[test]
+    fn accepts_password_with_all_required_character_classes() {
+        assert!(is_strong_password("Strong!Pass1").is_ok());
+    }
+
+    #[test]
+    fn rejects_password_missing_a_required_character_class() {
+        for password in ["lowercase!1", "UPPERCASE!1", "NoSpecial123", "NoDigits!!"] {
+            assert!(is_strong_password(password).is_err(), "accepted {password}");
+        }
+    }
+
+    #[test]
+    fn rejects_password_shorter_than_eight_bytes() {
+        assert!(is_strong_password("Aa!1xyz").is_err());
+    }
+}

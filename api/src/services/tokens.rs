@@ -58,3 +58,48 @@ impl TokenService {
         Ok(hex::encode(Sha256::digest(tokens.as_bytes())))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{TokenService, UserClaims};
+    use crate::error::ApiError;
+    use uuid::Uuid;
+
+    const SECRET: &[u8] = b"test-secret";
+
+    fn claims() -> UserClaims {
+        UserClaims {
+            iss: "ogasbook-auth".into(),
+            aud: "ogasbook-user".into(),
+            sub: Uuid::new_v4(),
+            sid: Uuid::new_v4(),
+            exp: (chrono::Utc::now().timestamp() + 60) as u64,
+        }
+    }
+
+    #[test]
+    fn verifies_token_with_expected_issuer_and_audience() {
+        let token = TokenService::create_token(&claims(), SECRET).unwrap();
+        let verified = TokenService::verify_token::<UserClaims>(
+            &token,
+            SECRET,
+            "ogasbook-auth",
+            "ogasbook-user",
+        );
+
+        assert!(verified.is_ok());
+    }
+
+    #[test]
+    fn rejects_token_with_unexpected_issuer() {
+        let token = TokenService::create_token(&claims(), SECRET).unwrap();
+        let result = TokenService::verify_token::<UserClaims>(
+            &token,
+            SECRET,
+            "unexpected-issuer",
+            "ogasbook-user",
+        );
+
+        assert!(matches!(result, Err(ApiError::Unauthorized(_))));
+    }
+}
