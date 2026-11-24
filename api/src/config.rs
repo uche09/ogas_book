@@ -9,7 +9,7 @@ pub struct Config {
 
 impl Config {
     pub fn from_env() -> anyhow::Result<Self> {
-        dotenvy::dotenv().expect("Failed to load .env file");
+        dotenvy::dotenv().ok();
         Ok(Self {
             port: env::var("PORT").unwrap_or("3000".into()).parse()?,
             db_url: env::var("DATABASE_URL").expect("Add \"DATABASE_URL\" to env"),
