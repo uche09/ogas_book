@@ -11,10 +11,10 @@ impl Config {
     pub fn from_env() -> anyhow::Result<Self> {
         dotenvy::dotenv().ok();
         Ok(Self {
-            port: env::var("API_PORT").unwrap_or("3000".into()).parse()?,
+            port: env::var("PORT").unwrap_or("3000".into()).parse()?,
             db_url: env::var("DATABASE_URL").expect("Add \"DATABASE_URL\" to env"),
             jwt_secret: env::var("JWT_SECRET")
-                .unwrap_or("SeCrEt".to_string())
+                .expect("JWT_SECRET must be set")
                 .as_bytes()
                 .to_owned(),
         })

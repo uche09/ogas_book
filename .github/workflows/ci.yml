@@ -42,6 +42,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo install sqlx-cli --version 0.9.0 --no-default-features --features postgres,rustls --locked
       - run: sqlx migrate run --source api/migrations
+      - run: cargo sqlx prepare --workspace --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
 
   test:

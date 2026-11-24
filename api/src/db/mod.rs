@@ -11,7 +11,7 @@ pub use uuid::Uuid;
 pub async fn make_pool(database_url: &str) -> Result<PgPool, sqlx::Error> {
     PgPoolOptions::new()
         .max_connections(10)
-        .acquire_timeout(std::time::Duration::from_secs(5))
+        .acquire_timeout(std::time::Duration::from_secs(30))
         .connect(database_url)
         .await
 }
